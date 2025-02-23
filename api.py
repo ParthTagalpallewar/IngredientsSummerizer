@@ -6,8 +6,12 @@ from sklearn.metrics.pairwise import cosine_similarity
 # Initialize Flask app
 app = Flask(__name__)
 
-# Load dataset
-df = pd.read_csv("dataset.csv")
+import requests
+import io
+
+url = "https://drive.google.com/file/d/1lgEOfEV5CoM9b7-Rtx8ElhrvQI1tLLAd/view?usp=drive_link"
+df = pd.read_csv(io.StringIO(requests.get(url).text))
+
 
 # Initialize TF-IDF vectorizer
 vectorizer = TfidfVectorizer()
