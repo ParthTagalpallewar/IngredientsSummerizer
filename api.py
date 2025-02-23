@@ -9,8 +9,7 @@ app = Flask(__name__)
 import requests
 import io
 
-url = "https://drive.google.com/file/d/1lgEOfEV5CoM9b7-Rtx8ElhrvQI1tLLAd/view?usp=drive_link"
-df = pd.read_csv(io.StringIO(requests.get(url).text))
+df = pd.read_csv("dataset.csv")
 
 
 # Initialize TF-IDF vectorizer
