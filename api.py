@@ -1,28 +1,26 @@
 from flask import Flask, request, jsonify
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+from transformers import pipeline
 
 # Initialize Flask app
 app = Flask(__name__)
 
-import requests
-import io
-
+# Load dataset
 df = pd.read_csv("dataset.csv")
 
-
-# Initialize TF-IDF vectorizer
-vectorizer = TfidfVectorizer()
-X = vectorizer.fit_transform(df["Ingredients"])
+# Initialize BERT-based summarizer
+summarizer = pipeline("summarization")
 
 def get_facts(ingredients_input):
     items = [item.strip() for item in ingredients_input.split(",")]
-    n = len(items)
-    input_vector = vectorizer.transform([ingredients_input])
-    similarities = cosine_similarity(input_vector, X).flatten()
-    top_indices = similarities.argsort()[-n:][::-1]
-    return " ".join(df.iloc[top_indices]["Facts"])
+    facts = " ".join(df[df["Ingredients"].isin(items)]["Facts"])
+    if not facts:
+        return "No relevant facts found."
+    if(len(items) > 4):
+        summary = summarizer(facts, max_length=300, min_length=150, do_sample=False)
+    else:
+        summary = summarizer(facts, max_length=200, min_length=50, do_sample=False)
+    return summary[0]["summary_text"]
 
 @app.route("/get_facts", methods=["POST"])
 def api_get_facts():
